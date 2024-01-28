@@ -2,8 +2,8 @@
 // @name         NYTXW Add Prev Next Buttons
 // @namespace    http://tampermonkey.net/
 // @version      2024-01-28
-// @description  try to take over the world!
-// @author       You
+// @description  https://github.com/seeshanty/nytxw_buttons
+// @author       seeshanty
 // @match        https://www.nytimes.com/crosswords/game/daily/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=nytimes.com
 // @grant        none
