@@ -4,7 +4,7 @@
 // @version      2024-01-28
 // @description  https://github.com/seeshanty/nytxw_buttons
 // @author       seeshanty
-// @match        https://www.nytimes.com/crosswords/game/daily/*
+// @match        https://www.nytimes.com/crosswords/game/daily*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=nytimes.com
 // @grant        none
 // ==/UserScript==
@@ -25,6 +25,10 @@
     // HARDCODED BASE URLS
     var archiveBaseUrl = "https://www.nytimes.com/crosswords/archive/daily/";
 
+    // CONVENIENCE URL FOR WORKING THROUGH THE ARCHIVE FROM MAIN /daily PUZZLE
+    var useArchiveDefaultUrl = true; // whether or not to use the Archive Default URL on the main /daily puzzle
+    var archiveDefaultUrl = "https://www.nytimes.com/crosswords/archive/daily/2023/06"; // update YYYY/MM as needed
+
     // FUNCTIONALITY PARAMETERS
     var extraTimeout = 200;
 
@@ -36,19 +40,30 @@
     var currentUrl = window.location.href;
     console.log("Current URL:", currentUrl);
 
-    // Extract the baseUrl, year, month, and day from the URL
-    var parts = currentUrl.split('/');
-    var baseUrl = parts.slice(0, parts.length - 3).join('/') + '/';
-    var year = parseInt(parts[parts.length - 3]);
-    var month = parseInt(parts[parts.length - 2]);
-    var day = parseInt(parts[parts.length - 1]);
+    // initialize variables
+    var baseUrl = "";
+    var currentDate = new Date(); // default to today
+    var isCurrentPuzzle = false;
+
+    // Do different things if there is no YYYY/MM/DD
+    if (currentUrl == "https://www.nytimes.com/crosswords/game/daily" ||
+        currentUrl == "https://www.nytimes.com/crosswords/game/daily/") {
+        baseUrl = "https://www.nytimes.com/crosswords/game/daily/";
+        isCurrentPuzzle = true;
+    } else {
+        // Extract the baseUrl, year, month, and day from the URL
+        var parts = currentUrl.split('/');
+        baseUrl = parts.slice(0, parts.length - 3).join('/') + '/';
+        var year = parseInt(parts[parts.length - 3]);
+        var month = parseInt(parts[parts.length - 2]);
+        var day = parseInt(parts[parts.length - 1]);
+        console.log("Year:", year, "Month:", month, "Day:", day);
+        currentDate = new Date(year, month - 1, day);
+    }
 
     console.log("Base URL:", baseUrl);
-    console.log("Year:", year, "Month:", month, "Day:", day);
-
-    // Create a Date object with the current date
-    var currentDate = new Date(year, month - 1, day);
     console.log("Current Date:", currentDate);
+    console.log("Is Current Puzzle:",isCurrentPuzzle);
 
     //----------------
     // PREVIOUS
@@ -136,18 +151,23 @@
         nextBtn.style.width = navBtnWidth;
         nextBtn.style.marginLeft = navBtnSpacing;
         nextBtn.style.border= navBtnBorder;
-        nextBtn.addEventListener("mouseenter", function() {
-            nextBtn.style.backgroundColor = btnHoverColor;
-        });
+        if (isCurrentPuzzle) {
+            nextBtn.disabled = true;
+            nextBtn.style.borderColor = "lightgray";
+        } else {
+            nextBtn.addEventListener("mouseenter", function() {
+                nextBtn.style.backgroundColor = btnHoverColor;
+            });
 
-        nextBtn.addEventListener("mouseleave", function() {
-            nextBtn.style.backgroundColor = btnColor;
-        });
-        nextBtn.addEventListener("click", function() {
-            console.log("Next button clicked...");
-            // Redirect to the next URL
-            window.location.href = nextUrl;
-        });
+            nextBtn.addEventListener("mouseleave", function() {
+                nextBtn.style.backgroundColor = btnColor;
+            });
+            nextBtn.addEventListener("click", function() {
+                console.log("Next button clicked...");
+                // Redirect to the next URL
+                window.location.href = nextUrl;
+            });
+        }
 
         console.log("Returning the 'Next' button...");
         return nextBtn;
@@ -173,8 +193,12 @@
         });
         archiveCalBtn.addEventListener("click", function() {
             console.log("Archive Calendar button clicked...");
-            // Redirect to the next URL
+            // Redirect to the archive calendar URL
+            if (isCurrentPuzzle && useArchiveDefaultUrl) {
+            window.location.href = archiveDefaultUrl;
+            } else {
             window.location.href = archiveCalendarUrl;
+            }
         });
 
         console.log("Returning the 'Archive Calendar' button...");
