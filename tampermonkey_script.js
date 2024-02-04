@@ -1,36 +1,40 @@
 // ==UserScript==
 // @name         NYTXW Add Prev Next Buttons
 // @namespace    http://tampermonkey.net/
-// @version      2024-02-01
+// @version      2024-02-03
 // @description  https://github.com/seeshanty/nytxw_buttons
 // @author       seeshanty
-// @match        https://www.nytimes.com/crosswords/game/daily*
+// @match        https://www.nytimes.com/crosswords/game/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=nytimes.com
 // @grant        none
 // ==/UserScript==
+
+// TODO: Handle bonus puzzles somehow; URL format below
+// https://www.nytimes.com/crosswords/game/bonus/2024/02
 
 (function() {
     'use strict';
 
     // STYLE PARAMETERS
-    var navBtnWidth = "100px";
-    var navBtnSpacing = "10px";
-    var navBtnBorder = "1px solid black";
-    var calBtnWidth = "40px";
-    var calBtnBorder = "1px solid white";
-    var btnColor = "white";
-    var btnHoverColor = "lightgray";
-    var btnLocation = "navBar"; //  Options: navBar, crosswordDate
+    const navBtnWidth = "100px";
+    const navBtnSpacing = "10px";
+    const navBtnBorder = "1px solid black";
+    const calBtnWidth = "40px";
+    const calBtnBorder = "1px solid white";
+    const btnColor = "white";
+    const btnHoverColor = "lightgray";
+    const btnLocation = "navBar"; //  Options: navBar, crosswordDate
 
-    // HARDCODED BASE URLS
-    var archiveBaseUrl = "https://www.nytimes.com/crosswords/archive/daily/";
+    // HARDCODED BASE URLS - these must end in "/" for proper URL concatenation later
+    const baseUrl = "https://www.nytimes.com/crosswords/game/daily/"; // default daily puzzle page
+    const archiveBaseUrl = "https://www.nytimes.com/crosswords/archive/daily/";
 
     // CONVENIENCE URL FOR WORKING THROUGH THE ARCHIVE FROM MAIN /daily PUZZLE
-    var useArchiveDefaultUrl = true; // whether or not to use the Archive Default URL from the newest daily puzzle
-    var archiveDefaultUrl = "https://www.nytimes.com/crosswords/archive/daily/2023/06"; // update YYYY/MM as needed
+    const useArchiveDefaultUrl = true; // whether or not to use the Archive Default URL from the newest daily puzzle
+    const archiveDefaultUrl = "https://www.nytimes.com/crosswords/archive/daily/2023/05"; // update YYYY/MM as needed
 
     // FUNCTIONALITY PARAMETERS
-    var extraTimeout = 200;
+    const extraTimeout = 200; // increase this if the script isn't catching the correct place to put the buttons
 
     //--------------------------------------------------------------------------
     // THINGS WE CAN DO WHILE WINDOW IS LOADING
@@ -45,58 +49,70 @@
     }
 
     // initialize variables
-    var baseUrl = "https://www.nytimes.com/crosswords/game/daily/"; // default puzzle page
     var URL_YYYY = "";
     var URL_MM = "";
     var URL_DD = "";
     var puzzleDate = new Date(); // default to today; parse from URL later
+    var onDailyPage = false;
+    var isSameDay = false; // are the puzzleDate and dateInNY the same?
     var puzzleDateIsToday = false;
     var puzzleDateIsFuture = false;
     var isNewestPuzzle = false;
 
     // set variables for the current date/time in NY
-    const currentDate = new Date();
-    const NY_YYYY = new Intl.DateTimeFormat('en-US', { year: 'numeric', timeZone: 'America/New_York' }).format(currentDate);
-    const NY_MM = new Intl.DateTimeFormat('en-US', { month: '2-digit', timeZone: 'America/New_York' }).format(currentDate);
-    const NY_DD = new Intl.DateTimeFormat('en-US', { day: '2-digit', timeZone: 'America/New_York' }).format(currentDate);
-    const dateInNY = new Date(NY_YYYY, NY_MM - 1, NY_DD);
-    console.log("dateInNY: ",NY_YYYY,"/",NY_MM,"/",NY_DD,"\n",dateInNY);
-    const NY_HH24 = new Intl.DateTimeFormat('en-US', { hourcycle: 'h23', hour12: false, hour: '2-digit', timeZone: 'America/New_York' }).format(currentDate);
-    const NY_DAY = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'America/New_York' }).format(currentDate);
-    const NY_isWeekend = ['Fri', 'Sat', 'Sun'].includes(NY_DAY);
+    const localDate = new Date();
+    const dateOptions = {
+        weekday: 'short',
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hour12: false,
+        timeZone: 'America/New_York'
+    };
+
+    const dateInNY = new Date(localDate.toLocaleDateString('en-US', dateOptions));
+    console.log("dateInNY:", dateInNY);
+    const NY_HH24 = new Intl.DateTimeFormat('en-US', { hour: '2-digit', hour12: false, timeZone: 'America/New_York' }).format(localDate);
+    const NY_DAY = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: 'America/New_York' }).format(localDate);
+    const NY_isWeekend = ['Sat', 'Sun'].includes(NY_DAY);
+    console.log("NY_HH24:", NY_HH24);
+    console.log("NY_DAY:", NY_DAY);
+    console.log("NY_isWeekend:", NY_isWeekend);
+
 
     // Puzzle date parsing
     if (currentUrl == baseUrl.slice(0, -1)) {
-        //There is no YYYY/MM/DD in the URL; assume it's today's puzzle
-        URL_YYYY = NY_YYYY;
-        URL_MM = NY_MM;
-        URL_DD = NY_DD;
-        puzzleDate = dateInNY;
-        puzzleDateIsToday = true;
-        console.log("No date in URL. Assuming puzzle date is today.\n",puzzleDate);
+        //There is no YYYY/MM/DD in the URL; we're on the daily page
+        console.log("No date in URL. Assuming puzzle is newest puzzle.");
+        onDailyPage = true;
     } else {
         // Extract the baseUrl, year, month, and day from the URL
         // Assumption: puzzle URLs end in /YYYY/MM/DD
         var parts = currentUrl.split('/');
-        baseUrl = parts.slice(0, parts.length - 3).join('/') + '/';
+        // baseUrl = parts.slice(0, parts.length - 3).join('/') + '/';
         URL_YYYY = parts[parts.length - 3];
         URL_MM = parts[parts.length - 2];
         URL_DD = parts[parts.length - 1];
         puzzleDate = new Date(URL_YYYY, URL_MM - 1, URL_DD);
         console.log("URL Date: ",URL_YYYY,"/",URL_MM,"/",URL_DD,"\n",puzzleDate);
+
+        // Check if puzzleDate is the same day as dateInNY
+        isSameDay = dateInNY.getFullYear() === puzzleDate.getFullYear() &&
+            dateInNY.getMonth() === puzzleDate.getMonth() &&
+            dateInNY.getDate() === puzzleDate.getDate();
+
+        console.log("isSameDay:", isSameDay);
     } // puzzle date parsing
 
     // compare puzzle date to the date in NY
-    if (puzzleDate > dateInNY) {
+    if (onDailyPage) {
+        isNewestPuzzle = true;
+    } else if (puzzleDate > dateInNY) {
         puzzleDateIsFuture = true;
         console.log("puzzleDateIsFuture: ",puzzleDateIsFuture);
         isNewestPuzzle = true;
-    } else if (puzzleDate >= dateInNY) {
-        puzzleDateIsToday = true;
-        console.log("puzzleDateIsToday: ",puzzleDateIsToday);
-
+    } else if (isSameDay) {
         // Check if the puzzle is the current puzzle
-        // New puzzles are available at 10 PM ET M-Th and 6 PM F/S/S
+        // New puzzles are available at 10 PM ET M-F and 6 PM S/S
 
         if (NY_isWeekend && NY_HH24 >= 18 && NY_HH24 < 24) { // it's a weekend and it's between 6 PM and midnight
             isNewestPuzzle = false;
