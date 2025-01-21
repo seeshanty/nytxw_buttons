@@ -1,6 +1,6 @@
 This is a Tampermonkey JavaScript file that will add Previous, 📆, and Next buttons to the NYT Crossword Puzzle webpage for easier navigation around the calendar. It mostly shouldn't send you to days that don't exist yet but hasn't been thoroughly tested. When you're at the latest puzzle, the Next button should grey out as shown in the screenshot below. 
 
-![Screenshot of the NYT Crossword page showing the new buttons](https://github.com/seeshanty/nytxw_buttons/blob/main/nytxw_screenshot.png)
+![Screenshot of the NYT Crossword page showing the new buttons](https://raw.githubusercontent.com/seeshanty/nytxw_buttons/76b0cf91028486f41961541d64bdb967835f1dd6/nytxw_screenshot.png)
 
 # Installation/Usage
 1. Install the Tampermonkey extension/add-on for your web browser
