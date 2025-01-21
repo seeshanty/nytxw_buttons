@@ -1,9 +1,11 @@
 // ==UserScript==
 // @name         NYTXW Add Prev Next Buttons
-// @namespace    http://tampermonkey.net/
+// @namespace    https://github.com/seeshanty
 // @version      2025-01-20
 // @description  Add Previous, 📆, and Next buttons to the New York Times Crossword Puzzle webpage for easier navigation around the calendar
 // @author       seeshanty
+// @license      CC0-1.0
+// @supportURL   https://github.com/seeshanty/nytxw_buttons
 // @match        https://www.nytimes.com/crosswords/game/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=nytimes.com
 // @grant        none
