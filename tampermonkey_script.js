@@ -22,7 +22,7 @@
     // When set to true, the calendar button on the latest puzzle will send you to whatever month you set here
     const useArchiveBookmark = true;
     const archiveBookmarkYear = 2024;
-    const archiveBookmarkMonth = 8;
+    const archiveBookmarkMonth = 9;
 
     // STYLE PARAMETERS
     const navBtnWidth = "100px";
