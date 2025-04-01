@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NYTXW Add Prev Next Buttons
 // @namespace    https://github.com/seeshanty
-// @version      2025-01-20
+// @version      2025-03-31
 // @description  Add Previous, 📆, and Next buttons to the New York Times Crossword Puzzle webpage for easier navigation around the calendar
 // @author       seeshanty
 // @license      CC0-1.0
