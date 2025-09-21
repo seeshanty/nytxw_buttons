@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NYTXW Add Prev Next Buttons
 // @namespace    https://github.com/seeshanty
-// @version      2025-09-21
+// @version      2025-09-21.2
 // @description  Add Previous, 📆, and Next buttons to the New York Times Crossword Puzzle webpage for easier navigation around the calendar
 // @author       seeshanty
 // @license      CC0-1.0
@@ -16,7 +16,7 @@
 // ⭐
 
 // Changelog:
-// 2025-09-21     Added function hideBannerPortal
+// 2025-09-21     Added function hideBannerPortal and hideAdTop
 
 (function() {
     'use strict';
@@ -329,6 +329,14 @@
         }
     }
 
+    // Function to hide the top ad
+    function hideAdTop() {
+        const adTop = document.getElementById('ad-top');
+        if (adTop) {
+            adTop.style.display = 'none';
+        }
+    }
+
     //==========================================================================
     // WAIT FOR THE WINDOW TO FINISH LOADING BEFORE ATTEMPTING TO APPEND BUTTONS
     //==========================================================================
@@ -338,6 +346,7 @@
         setTimeout(function(){
             appendExtraNavButtons();
             hideBannerPortal();
+            hideAdTop();
         }, extraTimeout);
 
     }, false); // window load listener
