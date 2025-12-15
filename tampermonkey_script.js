@@ -335,8 +335,11 @@
         if (adTop) {
             adTop.style.display = 'none';
         }
+        document.querySelectorAll('.pz-ad-box').forEach(el => {
+            el.remove();
+        });
     }
-
+    
     //==========================================================================
     // WAIT FOR THE WINDOW TO FINISH LOADING BEFORE ATTEMPTING TO APPEND BUTTONS
     //==========================================================================
