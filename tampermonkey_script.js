@@ -6,7 +6,7 @@
 // @author       seeshanty
 // @license      CC0-1.0
 // @supportURL   https://github.com/seeshanty/nytxw_buttons
-// @match        https://www.nytimes.com/crosswords/game/*
+// @match        https://www.nytimes.com/crosswords/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=nytimes.com
 // @grant        none
 // ==/UserScript==
